@@ -1,0 +1,55 @@
+@startuml
+actor UserA
+participant "STUN Server" as StunServer
+participant "Host Machine A" as HostA
+database "Signaling Server" as SignalingServer
+participant "Host Machine B" as HostB
+actor UserB
+
+UserA -> HostA: Open WebRTC App
+UserB -> HostB: Open WebRTC App
+
+activate HostA
+activate HostB
+
+UserA -> HostA: Create Offer button clicked
+HostA -> HostA: createOffer()
+HostA -> HostA: peerConnection.setLocalDescription(offer)
+note over HostA: ice gathering process starts
+HostA -> StunServer: Initiate ICE gathering
+activate StunServer
+StunServer --> HostA: Return gathered local ICE candidates
+
+UserB -> HostB: getUserMedia permission requested
+HostB -> HostB: getUserMedia({ video: true, audio: false })
+HostB -> HostB: User grants permission
+
+note over HostB: Receive Offer SDP and STUN response from UserA through some (any) medium 
+
+HostA -> SignalingServer: Send offer SDP and STUN response to HostA
+SignalingServer -> HostB: Send offer SDP and STUN response to HostA
+
+HostB -> HostB: createPeerConnection("answer-sdp")
+HostB -> HostB: setRemoteDescription(offer)
+UserB -> HostB: Create Answer button clicked
+HostB -> HostB: createAnswer()
+HostB -> HostB: setLocalDescription(answer)
+HostB -> StunServer: Initiate ICE gathering
+activate StunServer
+StunServer --> HostB: Return gathered local ICE candidates
+
+HostB -> SignalingServer: Send answer SDP and STUN response to HostA
+SignalingServer -> HostA: Send answer SDP and STUN response to HostA
+HostA -> HostA: setRemoteDescription(answer)
+HostA -> HostA: onicecandidate event (remote candidate gathered)
+HostA -> HostA: Connect to remote ICE candidate
+HostA -> HostA: Remote video stream connected
+
+HostB -> HostB: onicecandidate event (remote candidate gathered)
+HostB -> HostB: Connect to remote ICE candidate
+HostB -> HostB: Remote video stream connected
+
+deactivate HostA
+deactivate HostB
+deactivate StunServer
+@enduml
