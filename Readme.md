@@ -40,6 +40,8 @@ To set up a WebRTC connection:
 
 Check the provided example code in this repository for a basic WebRTC setup.
 
+![WebRTC Workflow](webRTC%20uml-diagram.png)
+
 Feel free to explore further and customize your WebRTC implementation based on specific requirements.
 
 Happy Coding!
